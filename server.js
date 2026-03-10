@@ -1,5 +1,7 @@
 const http = require("http")
 const url = require("url")
+const db = require("./db")
+const {broadcast} = require("./websocket")
 
 const server = http.createServer((req,res)=>{
 
@@ -33,6 +35,66 @@ function createWheel(res){
  )
 
  res.end("Wheel created")
+
+ })
+
+}
+function joinWheel(req,res,userId){
+
+ // find active wheel
+ db.query(
+ "SELECT * FROM spin_wheels WHERE status='waiting'",
+ (err,wheelResult)=>{
+
+ if(wheelResult.length===0){
+   res.end("No active wheel")
+   return
+ }
+
+ const wheel = wheelResult[0]
+ const wheelId = wheel.id
+ const entryFee = wheel.entry_fee
+
+ // check user coins
+ db.query(
+ "SELECT * FROM users WHERE id=?",
+ [userId],
+ (err,userResult)=>{
+
+ const user = userResult[0]
+
+ if(user.coins < entryFee){
+   res.end("Not enough coins")
+   return
+ }
+
+ // deduct coins
+ db.query(
+ "UPDATE users SET coins = coins - ? WHERE id=?",
+ [entryFee,userId]
+ )
+
+ // add participant
+ db.query(
+ "INSERT INTO participants(user_id,wheel_id) VALUES (?,?)",
+ [userId,wheelId]
+ )
+
+ // update prize pools
+ const winnerShare = entryFee * 0.7
+ const adminShare = entryFee * 0.2
+ const appShare = entryFee * 0.1
+
+ db.query(
+ "UPDATE spin_wheels SET winner_pool = winner_pool + ?, admin_pool = admin_pool + ?, app_pool = app_pool + ? WHERE id=?",
+ [winnerShare,adminShare,appShare,wheelId]
+ )
+
+ broadcast("User "+userId+" joined the wheel")
+
+ res.end("Joined successfully")
+
+ })
 
  })
 
