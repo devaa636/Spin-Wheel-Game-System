@@ -16,6 +16,28 @@ function startElimination(){
 
 }
 
+function eliminatePlayer(){
+
+ if(players.length === 1){
+
+  clearInterval(eliminationInterval)
+
+  declareWinner(players[0])
+
+  return
+ }
+
+ const eliminated = players.pop()
+
+ db.query(
+ "UPDATE participants SET eliminated=true WHERE user_id=?",
+ [eliminated]
+ )
+
+ broadcast("Player eliminated: "+eliminated)
+
+}
+
 function startGame(){
  console.log("Game starting...")
 
@@ -39,9 +61,10 @@ function startGame(){
 
  shufflePlayers()
 
+ broadcast("Game started")
+
  startElimination()
 
- broadcast("Game started")
 
  })
 }
