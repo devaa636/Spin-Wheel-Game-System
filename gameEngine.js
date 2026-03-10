@@ -4,6 +4,10 @@ const {broadcast} = require("./websocket")
 let players = []
 let eliminationInterval = null
 
+function shufflePlayers(){
+ players.sort(()=>Math.random()-0.5)
+}
+
 function startGame(){
  console.log("Game starting...")
 
@@ -24,6 +28,8 @@ function startGame(){
  }
 
  players = result.map(p => p.user_id)
+
+ shufflePlayers()
 
  broadcast("Game started")
 
