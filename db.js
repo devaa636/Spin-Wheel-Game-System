@@ -4,14 +4,15 @@ const db = mysql.createConnection({
  host: "localhost",
  user: "root",
  password: "Devansh@13",
- database: "spinwheel"
+ database: "spinwheel",
+ port: "3306",
 })
 
 db.connect(err=>{
  if(err){
   console.log("DB connection error")
  } else{
-  console.log("Database connected")
+  console.log("MySQL Database connected")
  }
 })
 

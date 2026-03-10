@@ -11,13 +11,20 @@ const server = http.createServer((req,res)=>{
   createWheel(res)
  }
 
+ if(parsedUrl.pathname === "/join"){
+
+ const userId = parsedUrl.query.userId
+
+ joinWheel(req,res,userId)
+
+}
+
 })
 
 server.listen(3000,()=>{
  console.log("Server running on port 3000")
 })
 
-const db = require("./db")
 
 function createWheel(res){
 
