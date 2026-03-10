@@ -38,6 +38,27 @@ function eliminatePlayer(){
 
 }
 
+function declareWinner(winnerId){
+
+ broadcast("Winner is "+winnerId)
+
+ db.query(
+ "SELECT winner_pool FROM spin_wheels WHERE status='waiting'",
+ (err,result)=>{
+
+ const winnerPool = result[0].winner_pool
+
+ db.query(
+ "UPDATE users SET coins = coins + ? WHERE id=?",
+ [winnerPool,winnerId]
+ )
+
+ broadcast("Winner credited" + winnerPool + "coins")
+
+ })
+
+}
+
 function startGame(){
  console.log("Game starting...")
 
