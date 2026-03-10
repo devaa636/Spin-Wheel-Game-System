@@ -6,6 +6,28 @@ let eliminationInterval = null
 
 function startGame(){
  console.log("Game starting...")
+
+ db.query(
+ "SELECT * FROM participants WHERE eliminated=false",
+ (err,result)=>{
+ 
+ if(err){
+   console.log(err)
+   return
+ }
+
+ if(result.length < 3){
+
+  broadcast("Game aborted: not enough players")
+
+  return
+ }
+
+ players = result.map(p => p.user_id)
+
+ broadcast("Game started")
+
+ })
 }
 
 module.exports = {
