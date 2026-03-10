@@ -3,6 +3,8 @@ const url = require("url")
 const db = require("./db")
 const {broadcast} = require("./websocket")
 
+const { startGame } = require("./gameEngine")
+
 const server = http.createServer((req,res)=>{
 
  const parsedUrl = url.parse(req.url,true)
@@ -38,14 +40,24 @@ function createWheel(res){
  }
 
  db.query(
- "INSERT INTO spin_wheels(entry_fee,status) VALUES (100,'waiting')"
- )
+  "INSERT INTO spin_wheels(entry_fee,status) VALUES (100,'waiting')",
+  (err,result)=>{
 
- res.end("Wheel created")
+   console.log("Wheel created")
+
+   // START 3 MINUTE TIMER HERE
+   setTimeout(()=>{
+     startGame()
+   },180000)
+
+   res.end("Wheel created")
+
+  })
 
  })
 
 }
+
 function joinWheel(req,res,userId){
 
  // find active wheel
