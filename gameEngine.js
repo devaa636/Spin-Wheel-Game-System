@@ -8,6 +8,14 @@ function shufflePlayers(){
  players.sort(()=>Math.random()-0.5)
 }
 
+function startElimination(){
+
+ eliminationInterval = setInterval(()=>{
+  eliminatePlayer()
+ },7000)
+
+}
+
 function startGame(){
  console.log("Game starting...")
 
@@ -30,6 +38,8 @@ function startGame(){
  players = result.map(p => p.user_id)
 
  shufflePlayers()
+
+ startElimination()
 
  broadcast("Game started")
 
