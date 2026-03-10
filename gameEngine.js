@@ -34,13 +34,13 @@ function eliminatePlayer(){
  [eliminated]
  )
 
- broadcast("Player eliminated: "+eliminated)
+ broadcast("Player eliminated: " + eliminated)
 
 }
 
 function declareWinner(winnerId){
 
- broadcast("Winner is "+winnerId)
+ broadcast("Winner is " + winnerId)
 
  db.query(
  "SELECT winner_pool FROM spin_wheels WHERE status='waiting'",
