@@ -40,24 +40,33 @@ function eliminatePlayer(){
 
 function declareWinner(winnerId){
 
- broadcast("Winner is " + winnerId)
+ broadcast("Winner declared: " + winnerId)
 
+ // update wheel status
  db.query(
  "UPDATE spin_wheels SET status='FINISHED' WHERE status='STARTED'"
  )
 
  db.query(
- "SELECT winner_pool FROM spin_wheels WHERE status='waiting'",
+ "SELECT id, winner_pool FROM spin_wheels WHERE status='FINISHED' ORDER BY id DESC LIMIT 1",
  (err,result)=>{
 
  const winnerPool = result[0].winner_pool
+ const wheelId = result[0].id
 
+ // Credit coins to winner
  db.query(
  "UPDATE users SET coins = coins + ? WHERE id=?",
  [winnerPool,winnerId]
  )
 
- broadcast("Winner credited" + winnerPool + "coins")
+ // Record transaction (ADD HERE)
+ db.query(
+ "INSERT INTO transactions(user_id,amount,type,wheel_id) VALUES (?,?,?,?)",
+ [winnerId,winnerPool,"WIN",wheelId]
+ )
+
+ broadcast("Winner credited " + winnerPool + " coins")
 
  })
 

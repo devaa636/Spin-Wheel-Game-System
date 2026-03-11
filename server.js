@@ -13,13 +13,23 @@ const server = http.createServer((req,res)=>{
   createWheel(res)
  }
 
- if(parsedUrl.pathname === "/join"){
+ else if(parsedUrl.pathname === "/join"){
 
  const userId = parsedUrl.query.userId
 
  joinWheel(req,res,userId)
 
-}
+ }
+
+ else if(parsedUrl.pathname === "/status"){
+
+  db.query(
+  "SELECT * FROM spin_wheels ORDER BY id DESC LIMIT 1",
+  (err,result)=>{
+   res.end(JSON.stringify(result))
+  })
+
+ }
 
 })
 
