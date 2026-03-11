@@ -40,7 +40,7 @@ function createWheel(res){
  }
 
  db.query(
-  "INSERT INTO spin_wheels(entry_fee,status) VALUES (100,'waiting')",
+  "INSERT INTO spin_wheels(entry_fee,status) VALUES (100,'WAITING')",
   (err,result)=>{
 
    console.log("Wheel created")

@@ -43,6 +43,10 @@ function declareWinner(winnerId){
  broadcast("Winner is " + winnerId)
 
  db.query(
+ "UPDATE spin_wheels SET status='FINISHED' WHERE status='STARTED'"
+ )
+
+ db.query(
  "SELECT winner_pool FROM spin_wheels WHERE status='waiting'",
  (err,result)=>{
 
@@ -93,6 +97,10 @@ function startGame(){
  }
 
  if(result.length < 3){
+
+  db.query(
+ "UPDATE spin_wheels SET status='ABORTED' WHERE status='WAITING'"
+ )
 
   broadcast("Game aborted: not enough players")
 
