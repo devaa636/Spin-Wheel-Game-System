@@ -92,6 +92,19 @@ function joinWheel(req,res,userId){
  "UPDATE users SET coins = coins - ? WHERE id=?",
  [entryFee,userId]
  )
+ 
+ // prevent duplicate join
+ db.query(
+"SELECT * FROM participants WHERE user_id=? AND wheel_id=?",
+[userId,wheelId],
+(err,result)=>{
+
+ if(result.length > 0){
+  res.end("User already joined")
+  return
+ }
+
+})
 
  // add participant
  db.query(
