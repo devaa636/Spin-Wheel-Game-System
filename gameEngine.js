@@ -105,6 +105,10 @@ function startGame(){
 
  shufflePlayers()
 
+ db.query(
+ "UPDATE spin_wheels SET status='STARTED' WHERE status='WAITING'"
+ )
+
  broadcast("Game started")
 
  startElimination()

@@ -66,7 +66,7 @@ function joinWheel(req,res,userId){
  (err,wheelResult)=>{
 
  if(wheelResult.length===0){
-   res.end("No active wheel")
+   res.end("Game already started or no active wheel")
    return
  }
 
