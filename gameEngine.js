@@ -59,6 +59,27 @@ function declareWinner(winnerId){
 
 }
 
+function refundPlayers(){
+
+ db.query(
+ "SELECT * FROM participants",
+ (err,result)=>{
+
+ result.forEach(player=>{
+
+  db.query(
+  "UPDATE users SET coins = coins + 100 WHERE id=?",
+  [player.user_id]
+  )
+
+ })
+
+ broadcast("Game aborted. Coins refunded")
+
+ })
+
+}
+
 function startGame(){
  console.log("Game starting...")
 
@@ -74,6 +95,8 @@ function startGame(){
  if(result.length < 3){
 
   broadcast("Game aborted: not enough players")
+
+  refundPlayers()
 
   return
  }
