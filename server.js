@@ -70,74 +70,93 @@ function createWheel(res){
 
 function joinWheel(req,res,userId){
 
- // find active wheel
  db.query(
- "SELECT * FROM spin_wheels WHERE status='waiting'",
- (err,wheelResult)=>{
+ "SELECT * FROM spin_wheels WHERE status='WAITING'",
+ (err,wheels)=>{
 
- if(wheelResult.length===0){
+  if(wheels.length === 0){
    res.end("Game already started or no active wheel")
    return
- }
+  }
 
- const wheel = wheelResult[0]
- const wheelId = wheel.id
- const entryFee = wheel.entry_fee
+  const wheelId = wheels[0].id
+  const entryFee = wheels[0].entry_fee
 
- // check user coins
- db.query(
- "SELECT * FROM users WHERE id=?",
- [userId],
- (err,userResult)=>{
+  // check duplicate join
+  db.query(
+  "SELECT * FROM participants WHERE user_id=? AND wheel_id=?",
+  [userId,wheelId],
+  (err,participants)=>{
 
- const user = userResult[0]
+   if(participants.length > 0){
+    res.end("User already joined")
+    return
+   }
 
- if(user.coins < entryFee){
-   res.end("Not enough coins")
-   return
- }
+   // get user
+   db.query(
+   "SELECT * FROM users WHERE id=?",
+   [userId],
+   (err,users)=>{
 
- // deduct coins
- db.query(
- "UPDATE users SET coins = coins - ? WHERE id=?",
- [entryFee,userId]
- )
- 
- // prevent duplicate join
- db.query(
-"SELECT * FROM participants WHERE user_id=? AND wheel_id=?",
-[userId,wheelId],
-(err,result)=>{
+    const user = users[0]
 
- if(result.length > 0){
-  res.end("User already joined")
-  return
- }
+    if(!user){
+     res.end("User not found")
+     return
+    }
 
-})
+    // Admin cannot play the game
+    if(userId == 1){
+     res.end("Admin cannot join the game")
+     return
+    }
 
- // add participant
- db.query(
- "INSERT INTO participants(user_id,wheel_id) VALUES (?,?)",
- [userId,wheelId]
- )
+    if(user.coins < entryFee){
+     res.end("Not enough coins")
+     return
+    }
 
- // update prize pools
- const winnerShare = entryFee * 0.7
- const adminShare = entryFee * 0.2
- const appShare = entryFee * 0.1
+    // deduct coins and log transaction
+    db.query(
+    "UPDATE users SET coins = coins - ? WHERE id=?",
+    [entryFee,userId],
+    (err,result)=>{
 
- db.query(
- "UPDATE spin_wheels SET winner_pool = winner_pool + ?, admin_pool = admin_pool + ?, app_pool = app_pool + ? WHERE id=?",
- [winnerShare,adminShare,appShare,wheelId]
- )
+     if(err){
+      res.end("Failed to deduct coins")
+      return
+     }
 
- broadcast("User "+userId+" joined the wheel")
+     // Record transaction for joining fee
+     db.query(
+     "INSERT INTO transactions(user_id,amount,type,wheel_id) VALUES (?,?,?,?)",
+     [userId,entryFee,"ENTRY",wheelId],
+     (err)=>{
 
- res.end("Joined successfully")
+      if(err){
+       res.end("Failed to record transaction")
+       return
+      }
+
+      // insert participant
+      db.query(
+      "INSERT INTO participants(user_id,wheel_id,eliminated) VALUES(?,?,false)",
+      [userId,wheelId],
+      (err)=>{
+       if(err){
+        res.end("Failed to add participant")
+        return
+       }
+       res.end("Joined successfully")
+      })
+
+     })
+    })
+
+   })
+
+  })
 
  })
-
- })
-
 }
